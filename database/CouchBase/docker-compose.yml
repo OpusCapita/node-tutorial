@@ -1,0 +1,20 @@
+# docker-compose up -d
+# You can also execute
+# `docker run -d --name db -p 8091-8094:8091-8094 -p 11210:11210 couchbase`
+version: '3.1'
+services:
+  couchbase:
+    image: couchbase
+    container_name: couchbase
+    ports:
+      - "8091-8094:8091-8094"
+      - "11210:11210"
+  couchbase_dev:
+    image: node:16
+    container_name: couchbase_dev
+    user: ${UID}:${GID}
+    volumes:
+      - .:/home/node
+    command: "npx nodemon node i--max-old-space-size=1024 /home/node/index.js"
+# Admin interface on http://localhost:8091
+# `docker exec -it couchbase cbq --user Administrator`
