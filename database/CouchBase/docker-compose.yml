@@ -15,6 +15,6 @@ services:
     user: ${UID}:${GID}
     volumes:
       - .:/home/node
-    command: "npx nodemon node i--max-old-space-size=1024 /home/node/index.js"
+    command: "npx nodemon node --max-old-space-size=1024 /home/node/index.js"
 # Admin interface on http://localhost:8091
 # `docker exec -it couchbase cbq --user Administrator`

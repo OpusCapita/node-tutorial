@@ -14,6 +14,8 @@ async function main() {
   };
 
   /*
+  // You can perform actions on mongodb-client events:
+
   client.on('close', async function () {
     await console.log('Error...close');
   });
@@ -41,7 +43,12 @@ async function main() {
   //   name:...}
   // }
 
+  // If _id is not specified then it is generated usig ObjectId(object) (resulting in 12bytes long value)
+
   // MongoDB automatically creates INDEX over the _id field for fast data access
+  const indexes = await collection.listIndexes();
+  await console.log('Indexes: ', await indexes.toArray());
+  //[ { v: 2, key: { _id: 1 }, name: '_id_' } ]
 
   try {
     await collection.insertOne({ _id: document._id });
@@ -73,20 +80,50 @@ async function main() {
     { projection:{_id:0 }}));
   // {name:...}
 
-  //await importDocuments();
-  let t = process.hrtime.bigint();
-  for (i=0;i<=100000; i++) {
-    document._id = i;
-    document.nonIndexedField = i;
-    collection.insertOne({document});
-  }
-  t = process.hrtime.bigint(t);
-  await console.log('Insert finished in %d nanoseconds (%s seconds)', t, parseInt(t)/1_000_000_000_000_000);
+  /////////////////////////////
+  // SEARCHING
+  // WARNING: Searching can be slow!
 
-  console.log('item:',await collection.findOne({_id: '1'}));
-  console.log('item:',await collection.findOne({_id: '100000'}));
-  //await fetchAllById(); // Search using _id (indexed field)
-  //await fetchAllByNonindexedfield(); // Search using name (non-indexed field)
+  collection.insertMany(
+    {_id:1, age:1},
+    {_id:2, age:5},
+    {_id:3, age:10});
+
+  collection.findOne({ _id: 1, age:5 });
+  collection.findOne({ age: {'$gt':4 }});
+
+
+
+  //console.log(await collection.find({nonIndexedField: 'tx1'}).explain());
+  // Would use COLLSCAN for a collection scan
+
+  //console.log(await collection.find({_id: 'tx1'}).explain());
+  // Would use IDHACK to quickly return the value
+
+  /* LIMITS
+  max BSON document size 16MB
+  Max 100 levels of depth
+  Database name max 64 characters
+  Collection names without $, nul, system. prefix
+  _id must be unique for a collection
+  No limit on number of databases but must be less than max allowed OS open file handlers
+
+  https://docs.mongodb.com/manual/reference/limits/
+  */
+
+  /* SCALABILITY
+  MongoDB divides data into shards (subsets of data).
+  It is a good idea to create initially sharded collections - adding a new shard is easier than sharding an existing non-sharded collection.
+  Sharding must ba based on some shard key (ex. unique _id indexed field)
+  */
+
+  /* TODO's:
+  - Example where access by _id is faster than by non indexed field
+  - Sharded collecition
+  - Sharding existing non-sharded collection
+  - Adding a new sharded collection - what happend to existing data?
+  - Mongoose - ODM for MongoDB
+  */
 }
 main()
   .then(console.log)
