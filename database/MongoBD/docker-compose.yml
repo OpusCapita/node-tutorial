@@ -1,0 +1,29 @@
+# docker-compose up -d
+# You can also execute
+# `docker run -d --name db -p 8091-8094:8091-8094 -p 11210:11210 couchbase`
+version: '3.1'
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+  mongodb_gui:
+    image: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
+  mongodb_dev:
+    image: node:16
+    container_name: mongodb_dev
+    user: ${UID}:${GID}
+    working_dir: /home/node
+    volumes:
+      - .:/home/node
+    command: "node index.js"
+# Admin interface on http://localhost:8091
+# `docker exec -it couchbase cbq --user Administrator`

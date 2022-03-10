@@ -88,6 +88,8 @@ Can be distributed, returns most recent data
   - Relational DataBase Managemenet System designed for CIA long time ago
   - Version 2 released for public
   - Goal: to find relations between the data and allow data analytics
+  - Data stored on heap or in index (index organized tables)
+  - Partitioned tables could be used to drop old partitions (data retention)
   - Pros:
     - Almost 100% SQL compatible (Structured Query Language is an open standard)
     - Very mature
@@ -99,6 +101,8 @@ Can be distributed, returns most recent data
   - CP
   - Poor man's RDBMS
   - Owned by Oracle, not developed much
+  - Data stored on heap (clustered indexes supported but limited)
+  - Partitioned tables could be used to drop old partitions (data retention)
   - Pros:
     - Free
     - Mature
@@ -110,14 +114,23 @@ Can be distributed, returns most recent data
   - Open fork of MySQL
 - CouchDB
 - CouchBase
+  - CP (if a node dies its data are not available until fail-over)
+  - Data organized in buckets → scopes → collections → documents
+  - Supports document TTL
+  - Append-only: old versions are kept until compaction is executed
+  - Fast for frequent document update (but disk space consumption is high until compaction)
+  - Bad to check if document exists (write might be pending - app must rely on CAS)
+  - Max 20MiB per document
 - Cassandra
 - ElasticSearch
   - P, Consistency is prefered over Availability
-
+- Redis
+  - P, neither C nor A
 
 # Goals
 
 - simple way to run several databases (the less reading, the better)
+  - username:password always root:password (if possible)
 - consistent approach
 - out-of-the-box experience
 - no fancy stuff, just simple showcase
@@ -126,3 +139,6 @@ Can be distributed, returns most recent data
 # Assumptions
 
 - team is already using ocker-compose →  it will be used here
+- simple script `run.sh` to start docker-compose and any initialization scripts
+- development environment
+  `docker run -v $PWD:/home/node -u 1000 -it node:14 npx nodemon /home/node/index.js`
